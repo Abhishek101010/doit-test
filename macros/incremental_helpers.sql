@@ -6,7 +6,11 @@
     it keeps only rows on or after
     `max(<target_column>) - incremental_lookback_days`, which re-processes a
     small window of recent days so late-arriving or restated usage lines are
-    picked up again. The model's `unique_key` then removes the overlap.
+    picked up again.
+
+    On BigQuery the models pair this with `incremental_strategy =
+    'insert_overwrite'` and a date partition, so the partitions covered by the
+    lookback window are replaced wholesale rather than merged row by row.
 
     Arguments
     ---------
@@ -21,7 +25,7 @@
     Usage
     -----
         select * from {{ ref('raw_cloud_usage') }}
-        {{ incremental_date_filter('_usage_date', target_column = 'usage_date') }}
+        {{ incremental_date_filter('usage_date') }}
 #}
 {% macro incremental_date_filter(date_column, relation=none, target_column=none, operator='where') -%}
     {%- set target_relation = relation if relation is not none else this -%}
@@ -29,7 +33,10 @@
     {%- if is_incremental() and not var('full_refresh_usage', false) %}
         {{ operator }} {{ date_column }} >= (
             select coalesce(
-                max({{ high_water_column }}) - interval '{{ var("incremental_lookback_days", 3) }}' day,
+                date_sub(
+                    max({{ high_water_column }}),
+                    interval {{ var("incremental_lookback_days", 3) }} day
+                ),
                 date '1900-01-01'
             )
             from {{ target_relation }}
@@ -40,9 +47,9 @@
 
 {#
     Same idea for models that are rebuilt a whole month at a time
-    (delete+insert keyed on `usage_month`). The high-water month is pulled
-    back by the lookback window first, so the month that is still being
-    accumulated is always fully recomputed.
+    (month-partitioned `insert_overwrite` keyed on `usage_month`). The
+    high-water month is pulled back by the lookback window first, so the month
+    that is still being accumulated is always fully recomputed.
 #}
 {% macro incremental_month_filter(month_column, relation=none, target_column=none, operator='where') -%}
     {%- set target_relation = relation if relation is not none else this -%}
@@ -51,8 +58,11 @@
         {{ operator }} {{ month_column }} >= (
             select coalesce(
                 date_trunc(
-                    'month',
-                    max({{ high_water_column }}) - interval '{{ var("incremental_lookback_days", 3) }}' day
+                    date_sub(
+                        max({{ high_water_column }}),
+                        interval {{ var("incremental_lookback_days", 3) }} day
+                    ),
+                    month
                 ),
                 date '1900-01-01'
             )

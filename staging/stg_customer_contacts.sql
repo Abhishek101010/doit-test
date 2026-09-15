@@ -24,21 +24,22 @@ with source as (
 exploded as (
 
     select
-        customer_id,
-        unnest(contacts) as contact
-    from source
+        s.customer_id,
+        ct as contact
+    from source as s
+    cross join unnest(s.contacts) as ct
 
 ),
 
 renamed as (
 
     select
-        struct_extract(contact, 'contact_id')   as contact_id,
+        contact.contact_id      as contact_id,
         customer_id,
-        struct_extract(contact, 'full_name')    as contact_name,
-        struct_extract(contact, 'email')        as contact_email,
-        struct_extract(contact, 'role')         as contact_role,
-        struct_extract(contact, 'is_primary')   as is_primary_contact
+        contact.full_name       as contact_name,
+        contact.email           as contact_email,
+        contact.role            as contact_role,
+        contact.is_primary      as is_primary_contact
     from exploded
 
 )

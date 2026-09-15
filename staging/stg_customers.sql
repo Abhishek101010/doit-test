@@ -23,34 +23,34 @@ with source as (
 renamed as (
 
     select
-        customer_id,
-        customer_name,
-        lower(status)                                   as customer_status,
-        segment                                         as customer_segment,
-        industry,
+        c.customer_id,
+        c.customer_name,
+        lower(c.status)                     as customer_status,
+        c.segment                           as customer_segment,
+        c.industry,
 
         -- address struct
-        struct_extract(address, 'street')               as address_street,
-        struct_extract(address, 'city')                 as address_city,
-        struct_extract(address, 'country')              as address_country,
-        struct_extract(address, 'country_code')         as address_country_code,
-        struct_extract(address, 'region')               as sales_region,
+        c.address.street                    as address_street,
+        c.address.city                      as address_city,
+        c.address.country                   as address_country,
+        c.address.country_code              as address_country_code,
+        c.address.region                    as sales_region,
 
         -- account manager struct
-        struct_extract(account_manager, 'employee_id')  as account_manager_id,
-        struct_extract(account_manager, 'name')         as account_manager_name,
-        struct_extract(account_manager, 'email')        as account_manager_email,
+        c.account_manager.employee_id       as account_manager_id,
+        c.account_manager.name              as account_manager_name,
+        c.account_manager.email             as account_manager_email,
 
         -- nested array cardinality
-        len(contacts)                                   as contact_count,
-        len(subscriptions)                              as subscription_count,
-        len(billing_accounts)                           as billing_account_count,
+        array_length(c.contacts)            as contact_count,
+        array_length(c.subscriptions)       as subscription_count,
+        array_length(c.billing_accounts)    as billing_account_count,
 
-        cast(created_at as timestamp)                   as customer_created_at,
-        cast(created_at as date)                        as customer_created_date,
-        _loaded_at
+        c.created_at                        as customer_created_at,
+        date(c.created_at)                  as customer_created_date,
+        c._loaded_at
 
-    from source
+    from source as c
 
 )
 

@@ -23,10 +23,10 @@ features as (
 
     select
         product_id,
-        count(*)                                                    as feature_count,
-        count(*) filter (where availability_status = 'GA')          as ga_feature_count,
-        count(*) filter (where availability_status = 'PREVIEW')     as preview_feature_count,
-        count(*) filter (where availability_status = 'RETIRED')     as retired_feature_count
+        count(*)                                        as feature_count,
+        countif(availability_status = 'GA')             as ga_feature_count,
+        countif(availability_status = 'PREVIEW')        as preview_feature_count,
+        countif(availability_status = 'RETIRED')        as retired_feature_count
     from {{ ref('stg_product_features') }}
     group by 1
 
@@ -49,10 +49,10 @@ adoption as (
 
     select
         product_id,
-        count(distinct customer_id)                                     as customer_count,
-        count(*)                                                        as subscription_count,
-        count(*) filter (where is_active)                                as active_subscription_count,
-        sum(mrr_usd) filter (where is_active)                            as active_mrr_usd
+        count(distinct customer_id)                 as customer_count,
+        count(*)                                    as subscription_count,
+        countif(is_active)                          as active_subscription_count,
+        sum(if(is_active, mrr_usd, null))           as active_mrr_usd
     from {{ ref('stg_subscriptions') }}
     group by 1
 

@@ -3,8 +3,9 @@ version: 2
 models:
   - name: raw_customers
     description: >
-      Untouched landing of `data/raw/customers.json`. Nested structs and
-      arrays are preserved so the staging layer owns all flattening.
+      Untouched landing of the `landing.customers` BigQuery table. Nested
+      structs and arrays are preserved so the staging layer owns all
+      flattening.
     columns:
       - name: customer_id
         description: Natural key of the customer.
@@ -29,7 +30,7 @@ models:
         description: Timestamp the raw model was materialised.
 
   - name: raw_products
-    description: Untouched landing of `data/raw/products.json`.
+    description: Untouched landing of the `landing.products` BigQuery table.
     columns:
       - name: product_id
         description: Natural key of the product.
@@ -47,11 +48,11 @@ models:
 
   - name: raw_cloud_usage
     description: >
-      Untouched landing of `data/raw/cloud_usage.json` - a simulated
-      multicloud billing export at day / billing account / SKU grain.
-      Materialised **incrementally**: each run reloads only the trailing
-      `incremental_lookback_days` of `usage_date` and replaces the matching
-      `usage_id` rows.
+      Untouched landing of the `landing.cloud_usage` BigQuery table - a
+      simulated multicloud billing export at day / billing account / SKU
+      grain. Materialised **incrementally** and partitioned by `usage_date`:
+      each run reloads only the trailing `incremental_lookback_days` and
+      overwrites the matching partitions.
     columns:
       - name: usage_id
         description: Natural key of the usage line.
@@ -73,7 +74,5 @@ models:
         description: Array of credit structs (negative amounts).
       - name: labels
         description: Array of {key, value} label structs.
-      - name: _usage_date
-        description: Typed copy of `usage_date`; the incremental partition key.
       - name: _loaded_at
         description: Timestamp the raw model was materialised.

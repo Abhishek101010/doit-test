@@ -19,7 +19,7 @@
     )
 }}
 
-with usage as (
+with usage_lines as (
 
     select * from {{ ref('fct_cloud_usage_daily') }}
 
@@ -49,7 +49,7 @@ daily as (
         sum(optimisation_savings_usd)                       as optimisation_savings_usd,
         sum(total_savings_usd)                              as total_savings_usd
 
-    from usage
+    from usage_lines
     group by 1, 2, 3, 4, 5, 6, 7
 
 ),
@@ -72,7 +72,7 @@ with_trend as (
 )
 
 select
-    customer_id || '|' || cloud_provider || '|' || cast(usage_date as varchar) as customer_provider_day_key,
+    concat(customer_id, '|', cloud_provider, '|', cast(usage_date as string)) as customer_provider_day_key,
     *,
     effective_cost_usd - prev_day_effective_cost_usd                            as day_over_day_change_usd,
     case

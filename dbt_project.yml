@@ -19,8 +19,6 @@ clean-targets:
   - "dbt_packages"
 
 vars:
-  # Root folder that holds the landed nested JSON files (relative to the dbt project dir)
-  raw_data_path: "data/raw"
   # Reporting currency for all monetary metrics
   reporting_currency: "USD"
   # How many days of already-loaded history an incremental run re-processes,
@@ -29,6 +27,13 @@ vars:
   # Run with --vars 'full_refresh_usage: true' to bypass the incremental
   # filter without dropping and rebuilding the tables.
   full_refresh_usage: false
+  # The target BigQuery project has no billing account, so it runs in the
+  # sandbox tier, which forbids all DML (MERGE / INSERT) and therefore every
+  # dbt incremental strategy. While this is true the billing models build as
+  # partitioned `table`s via create-or-replace instead. Flip to false once
+  # billing is enabled to restore true incremental runs.
+  # See macros/materialization.sql.
+  bigquery_sandbox: true
 
 # Because each layer is its own model path, the layer folder name is no longer
 # part of a model's resource path - schema and materialisation are therefore

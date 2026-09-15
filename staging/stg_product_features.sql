@@ -24,9 +24,10 @@ with source as (
 exploded as (
 
     select
-        product_id,
-        unnest(features) as feature
-    from source
+        s.product_id,
+        f as feature
+    from source as s
+    cross join unnest(s.features) as f
 
 ),
 
@@ -34,11 +35,11 @@ renamed as (
 
     select
         product_id,
-        struct_extract(feature, 'feature_code')      as feature_code,
-        struct_extract(feature, 'feature_name')      as feature_name,
-        struct_extract(feature, 'availability')      as availability_status,
-        struct_extract(feature, 'min_tier')          as minimum_tier,
-        (struct_extract(feature, 'availability') = 'GA')  as is_generally_available
+        feature.feature_code            as feature_code,
+        feature.feature_name            as feature_name,
+        feature.availability            as availability_status,
+        feature.min_tier                as minimum_tier,
+        (feature.availability = 'GA')   as is_generally_available
     from exploded
 
 )

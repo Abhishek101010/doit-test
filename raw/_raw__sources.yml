@@ -1,0 +1,48 @@
+version: 2
+
+sources:
+  - name: landing
+    description: >
+      Landed JSON exports, loaded into BigQuery by
+      `scripts/load_raw_to_bigquery.py`. dbt only ever reads from this
+      dataset - it is the external boundary of the project. Schemas are
+      auto-detected on load, so nested STRUCT and ARRAY columns arrive
+      with the same shape they have in the source files.
+    database: friendlychat-843d1
+    schema: doit_demo
+
+    tables:
+      - name: customers
+        description: Customer master data with nested contacts, subscriptions and billing accounts.
+        columns:
+          - name: customer_id
+            description: Natural key of the customer.
+            data_tests:
+              - not_null
+              - unique
+
+      - name: products
+        description: Product catalogue with nested features and pricing tiers.
+        columns:
+          - name: product_id
+            description: Natural key of the product.
+            data_tests:
+              - not_null
+              - unique
+
+      - name: cloud_usage
+        description: >
+          Simulated multicloud billing export at day / billing account / SKU
+          grain, with nested cost, usage, savings structs and nested credits
+          and labels arrays.
+        loaded_at_field: export_time
+        columns:
+          - name: usage_id
+            description: Natural key of the usage line.
+            data_tests:
+              - not_null
+              - unique
+          - name: usage_date
+            description: Day the usage was metered.
+            data_tests:
+              - not_null

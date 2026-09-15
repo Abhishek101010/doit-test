@@ -5,23 +5,28 @@
     MRR that was live in the same month, giving the classic FinOps view
     of "what the customer spends" vs "what we bill them".
 
-    Incremental by whole month: only the months touched by the lookback
-    window are recomputed and `delete+insert` on `usage_month` swaps them
-    out. Every aggregate here is contained within a month, so month-level
-    replacement is lossless.
+    Incremental by whole month: the table is partitioned by `usage_month`
+    at MONTH granularity, so only the months touched by the lookback window
+    are recomputed and overwritten. Every aggregate here is contained within
+    a month, so month-level replacement is lossless.
 #}
 
 {{
     config(
-        materialized = 'incremental',
+        materialized = incremental_or_table(),
         schema = 'marts',
-        unique_key = 'usage_month',
-        incremental_strategy = 'delete+insert',
+        incremental_strategy = 'insert_overwrite',
+        partition_by = {
+            'field': 'usage_month',
+            'data_type': 'date',
+            'granularity': 'month'
+        },
+        cluster_by = ['customer_id', 'customer_segment'],
         tags = ['marts', 'finops', 'incremental']
     )
 }}
 
-with usage as (
+with usage_lines as (
 
     select * from {{ ref('fct_cloud_usage_daily') }}
     {{ incremental_month_filter('usage_month') }}
@@ -52,9 +57,9 @@ monthly_spend as (
         sum(flexsave_savings_usd)               as flexsave_savings_usd,
         sum(optimisation_savings_usd)           as optimisation_savings_usd,
         sum(total_savings_usd)                  as total_savings_usd,
-        sum(effective_cost_usd) filter (where is_flexsave_eligible) as flexsave_eligible_cost_usd
+        sum(if(is_flexsave_eligible, effective_cost_usd, null)) as flexsave_eligible_cost_usd
 
-    from usage
+    from usage_lines
     group by 1, 2, 3, 4, 5, 6, 7
 
 ),
@@ -74,7 +79,7 @@ subscription_revenue as (
         count(*)                                as live_subscription_count
     from months m
     inner join {{ ref('stg_subscriptions') }} s
-        on s.start_date <= last_day(m.usage_month)
+        on s.start_date <= last_day(m.usage_month, month)
         and (s.end_date is null or s.end_date >= m.usage_month)
     group by 1, 2
 
@@ -83,7 +88,7 @@ subscription_revenue as (
 final as (
 
     select
-        ms.customer_id || '|' || cast(ms.usage_month as varchar)    as customer_month_key,
+        concat(ms.customer_id, '|', cast(ms.usage_month as string))  as customer_month_key,
         ms.customer_id,
         ms.customer_name,
         ms.customer_segment,

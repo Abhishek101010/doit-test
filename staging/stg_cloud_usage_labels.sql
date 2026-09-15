@@ -5,16 +5,21 @@
     label - not just the ones promoted to columns in `stg_cloud_usage` -
     can be used for cost allocation.
 
-    Incremental on `usage_date`, replacing whole days for the same reason
-    as the credits model.
+    Partitioned and incremental on `usage_date`, overwriting whole days for
+    the same reason as the credits model.
 #}
 
 {{
     config(
-        materialized = 'incremental',
+        materialized = incremental_or_table(),
         schema = 'staging',
-        unique_key = 'usage_date',
-        incremental_strategy = 'delete+insert',
+        incremental_strategy = 'insert_overwrite',
+        partition_by = {
+            'field': 'usage_date',
+            'data_type': 'date',
+            'granularity': 'day'
+        },
+        cluster_by = ['customer_id', 'label_key'],
         tags = ['staging', 'cloud_usage', 'incremental']
     )
 }}
@@ -27,19 +32,20 @@ with source as (
         customer_id,
         labels
     from {{ ref('raw_cloud_usage') }}
-    where len(labels) > 0
-    {{ incremental_date_filter('_usage_date', relation = this, target_column = 'usage_date', operator = 'and') }}
+    where array_length(labels) > 0
+    {{ incremental_date_filter('usage_date', relation = this, target_column = 'usage_date', operator = 'and') }}
 
 ),
 
 exploded as (
 
     select
-        usage_id,
-        usage_date,
-        customer_id,
-        unnest(labels) as label
-    from source
+        s.usage_id,
+        s.usage_date,
+        s.customer_id,
+        l as label
+    from source as s
+    cross join unnest(s.labels) as l
 
 ),
 
@@ -47,10 +53,10 @@ renamed as (
 
     select
         usage_id,
-        cast(usage_date as date)                as usage_date,
+        usage_date,
         customer_id,
-        struct_extract(label, 'key')            as label_key,
-        struct_extract(label, 'value')          as label_value
+        label.key       as label_key,
+        label.value     as label_value
     from exploded
 
 )

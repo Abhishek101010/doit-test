@@ -16,22 +16,23 @@
 with source as (
 
     select
-        product_id,
-        struct_extract(pricing, 'model')    as pricing_model,
-        struct_extract(pricing, 'currency') as pricing_currency,
-        struct_extract(pricing, 'tiers')    as tiers
-    from {{ ref('raw_products') }}
+        p.product_id,
+        p.pricing.model     as pricing_model,
+        p.pricing.currency  as pricing_currency,
+        p.pricing.tiers     as tiers
+    from {{ ref('raw_products') }} as p
 
 ),
 
 exploded as (
 
     select
-        product_id,
-        pricing_model,
-        pricing_currency,
-        unnest(tiers) as tier
-    from source
+        s.product_id,
+        s.pricing_model,
+        s.pricing_currency,
+        t as tier
+    from source as s
+    cross join unnest(s.tiers) as t
 
 ),
 
@@ -39,13 +40,13 @@ renamed as (
 
     select
         product_id,
-        struct_extract(tier, 'tier_name')                                   as tier_name,
+        tier.tier_name                                      as tier_name,
         pricing_model,
         pricing_currency,
-        cast(struct_extract(tier, 'min_monthly_spend_usd') as double)       as min_monthly_spend_usd,
-        cast(struct_extract(tier, 'max_monthly_spend_usd') as double)       as max_monthly_spend_usd,
-        cast(struct_extract(tier, 'rate_pct') as double)                    as rate_pct,
-        struct_extract(tier, 'included_support')                            as included_support
+        cast(tier.min_monthly_spend_usd as float64)         as min_monthly_spend_usd,
+        cast(tier.max_monthly_spend_usd as float64)         as max_monthly_spend_usd,
+        tier.rate_pct                                       as rate_pct,
+        tier.included_support                               as included_support
     from exploded
 
 )

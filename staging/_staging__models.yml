@@ -164,8 +164,11 @@ models:
         description: Net cost after credits - what the customer actually pays.
       - name: environment
         description: Value of the `env` label, when present.
-      - name: labels_map
-        description: All labels as a MAP for ad-hoc lookups (labels_map['env']).
+      - name: labels
+        description: >
+          All labels as a repeated STRUCT of {key, value}. BigQuery has no MAP
+          type, so ad-hoc lookups use UNNEST, e.g.
+          `(select value from unnest(labels) where key = 'env')`.
 
   - name: stg_cloud_usage_credits
     description: >

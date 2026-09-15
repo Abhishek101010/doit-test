@@ -5,22 +5,28 @@
     / SKU) enriched with customer and billing account attributes so the
     BI layer never has to touch the staging models.
 
-    Incremental on `usage_date` with `unique_key = 'usage_id'`, mirroring
-    `stg_cloud_usage`. The dimension joins are safe to re-apply because
-    only the freshly loaded window is re-enriched.
+    Incremental on `usage_date`: the table is partitioned by day and dbt
+    overwrites exactly the partitions covered by the lookback window. The
+    dimension joins are safe to re-apply because only the freshly loaded
+    window is re-enriched.
 #}
 
 {{
     config(
-        materialized = 'incremental',
+        materialized = incremental_or_table(),
         schema = 'marts',
-        unique_key = 'usage_id',
-        incremental_strategy = 'delete+insert',
+        incremental_strategy = 'insert_overwrite',
+        partition_by = {
+            'field': 'usage_date',
+            'data_type': 'date',
+            'granularity': 'day'
+        },
+        cluster_by = ['customer_id', 'cloud_provider', 'service_id'],
         tags = ['marts', 'finops', 'incremental']
     )
 }}
 
-with usage as (
+with usage_lines as (
 
     select * from {{ ref('stg_cloud_usage') }}
     {{ incremental_date_filter('usage_date') }}
@@ -108,7 +114,7 @@ final as (
         u.total_savings_usd,
         '{{ var("reporting_currency") }}' as reporting_currency
 
-    from usage u
+    from usage_lines u
     inner join customers c on c.customer_id = u.customer_id
     left join accounts a   on a.billing_account_id = u.billing_account_id
 
