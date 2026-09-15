@@ -1,0 +1,260 @@
+[
+  {
+    "customer_id": "cus_0001",
+    "customer_name": "Northwind Analytics",
+    "status": "active",
+    "segment": "Enterprise",
+    "industry": "Retail",
+    "created_at": "2022-11-04T09:24:11Z",
+    "address": {
+      "street": "18 Finsbury Circus",
+      "city": "London",
+      "country": "United Kingdom",
+      "country_code": "GB",
+      "region": "EMEA"
+    },
+    "account_manager": {
+      "employee_id": "emp_112",
+      "name": "Dana Whitfield",
+      "email": "dana.whitfield@doit.example",
+      "region": "EMEA"
+    },
+    "contacts": [
+      { "contact_id": "con_00011", "full_name": "Priya Raman", "email": "priya.raman@northwind.example", "role": "Billing", "is_primary": true },
+      { "contact_id": "con_00012", "full_name": "Tom Beckett", "email": "tom.beckett@northwind.example", "role": "Technical", "is_primary": false }
+    ],
+    "subscriptions": [
+      { "subscription_id": "sub_10001", "product_id": "prd_navigator", "tier": "Enhanced", "start_date": "2022-12-01", "end_date": null, "seats": 120, "mrr_usd": 4500.0, "billing_frequency": "monthly", "status": "active" },
+      { "subscription_id": "sub_10002", "product_id": "prd_flexsave", "tier": "Standard", "start_date": "2023-03-01", "end_date": null, "seats": 0, "mrr_usd": 0.0, "billing_frequency": "usage_based", "status": "active" }
+    ],
+    "billing_accounts": [
+      { "billing_account_id": "01A2B3-C4D5E6-F7G8H9", "cloud_provider": "GCP", "currency": "USD", "payment_terms": "net_30", "is_reseller_account": true, "activated_on": "2022-12-01" },
+      { "billing_account_id": "aws-4471-2098-3312", "cloud_provider": "AWS", "currency": "USD", "payment_terms": "net_30", "is_reseller_account": true, "activated_on": "2023-04-15" }
+    ]
+  },
+  {
+    "customer_id": "cus_0002",
+    "customer_name": "Helios Fintech",
+    "status": "active",
+    "segment": "Mid-Market",
+    "industry": "Financial Services",
+    "created_at": "2023-02-17T14:02:45Z",
+    "address": {
+      "street": "440 Market Street",
+      "city": "San Francisco",
+      "country": "United States",
+      "country_code": "US",
+      "region": "NORTH_AMERICA"
+    },
+    "account_manager": {
+      "employee_id": "emp_207",
+      "name": "Marcus Lee",
+      "email": "marcus.lee@doit.example",
+      "region": "NORTH_AMERICA"
+    },
+    "contacts": [
+      { "contact_id": "con_00021", "full_name": "Alicia Gomez", "email": "alicia.gomez@helios.example", "role": "Billing", "is_primary": true },
+      { "contact_id": "con_00022", "full_name": "Ben Ortiz", "email": "ben.ortiz@helios.example", "role": "FinOps", "is_primary": false },
+      { "contact_id": "con_00023", "full_name": "Sara Klein", "email": "sara.klein@helios.example", "role": "Technical", "is_primary": false }
+    ],
+    "subscriptions": [
+      { "subscription_id": "sub_10003", "product_id": "prd_navigator", "tier": "Standard", "start_date": "2023-03-01", "end_date": null, "seats": 45, "mrr_usd": 1800.0, "billing_frequency": "monthly", "status": "active" },
+      { "subscription_id": "sub_10004", "product_id": "prd_solve", "tier": "Standard", "start_date": "2023-03-01", "end_date": "2024-09-30", "seats": 45, "mrr_usd": 1200.0, "billing_frequency": "monthly", "status": "churned" }
+    ],
+    "billing_accounts": [
+      { "billing_account_id": "aws-8890-1123-7745", "cloud_provider": "AWS", "currency": "USD", "payment_terms": "net_15", "is_reseller_account": true, "activated_on": "2023-03-01" }
+    ]
+  },
+  {
+    "customer_id": "cus_0003",
+    "customer_name": "Kestrel Media Group",
+    "status": "active",
+    "segment": "Enterprise",
+    "industry": "Media & Entertainment",
+    "created_at": "2021-06-30T08:15:00Z",
+    "address": {
+      "street": "2 Bligh Street",
+      "city": "Sydney",
+      "country": "Australia",
+      "country_code": "AU",
+      "region": "APAC"
+    },
+    "account_manager": {
+      "employee_id": "emp_318",
+      "name": "Yuki Tanaka",
+      "email": "yuki.tanaka@doit.example",
+      "region": "APAC"
+    },
+    "contacts": [
+      { "contact_id": "con_00031", "full_name": "Nathan Cole", "email": "nathan.cole@kestrel.example", "role": "Billing", "is_primary": true }
+    ],
+    "subscriptions": [
+      { "subscription_id": "sub_10005", "product_id": "prd_navigator", "tier": "Premium", "start_date": "2021-07-01", "end_date": null, "seats": 310, "mrr_usd": 9800.0, "billing_frequency": "monthly", "status": "active" },
+      { "subscription_id": "sub_10006", "product_id": "prd_solve", "tier": "Premium", "start_date": "2021-07-01", "end_date": null, "seats": 310, "mrr_usd": 5200.0, "billing_frequency": "monthly", "status": "active" },
+      { "subscription_id": "sub_10007", "product_id": "prd_flexsave", "tier": "Standard", "start_date": "2022-01-01", "end_date": null, "seats": 0, "mrr_usd": 0.0, "billing_frequency": "usage_based", "status": "active" }
+    ],
+    "billing_accounts": [
+      { "billing_account_id": "02F1G7-H8I9J0-K1L2M3", "cloud_provider": "GCP", "currency": "AUD", "payment_terms": "net_30", "is_reseller_account": true, "activated_on": "2021-07-01" },
+      { "billing_account_id": "az-sub-7f3a-9b21", "cloud_provider": "Azure", "currency": "AUD", "payment_terms": "net_30", "is_reseller_account": false, "activated_on": "2023-08-01" }
+    ]
+  },
+  {
+    "customer_id": "cus_0004",
+    "customer_name": "Vantage Health",
+    "status": "active",
+    "segment": "Mid-Market",
+    "industry": "Healthcare",
+    "created_at": "2023-09-12T11:47:33Z",
+    "address": {
+      "street": "77 Bay Street",
+      "city": "Toronto",
+      "country": "Canada",
+      "country_code": "CA",
+      "region": "NORTH_AMERICA"
+    },
+    "account_manager": {
+      "employee_id": "emp_207",
+      "name": "Marcus Lee",
+      "email": "marcus.lee@doit.example",
+      "region": "NORTH_AMERICA"
+    },
+    "contacts": [
+      { "contact_id": "con_00041", "full_name": "Emily Hart", "email": "emily.hart@vantagehealth.example", "role": "Billing", "is_primary": true },
+      { "contact_id": "con_00042", "full_name": "Raj Patel", "email": "raj.patel@vantagehealth.example", "role": "Technical", "is_primary": false }
+    ],
+    "subscriptions": [
+      { "subscription_id": "sub_10008", "product_id": "prd_navigator", "tier": "Standard", "start_date": "2023-10-01", "end_date": null, "seats": 30, "mrr_usd": 1500.0, "billing_frequency": "monthly", "status": "active" }
+    ],
+    "billing_accounts": [
+      { "billing_account_id": "03N4O5-P6Q7R8-S9T0U1", "cloud_provider": "GCP", "currency": "USD", "payment_terms": "net_30", "is_reseller_account": true, "activated_on": "2023-10-01" }
+    ]
+  },
+  {
+    "customer_id": "cus_0005",
+    "customer_name": "Orbital Robotics",
+    "status": "active",
+    "segment": "Startup",
+    "industry": "Manufacturing",
+    "created_at": "2024-01-08T16:31:20Z",
+    "address": {
+      "street": "Rothschild Blvd 22",
+      "city": "Tel Aviv",
+      "country": "Israel",
+      "country_code": "IL",
+      "region": "EMEA"
+    },
+    "account_manager": {
+      "employee_id": "emp_112",
+      "name": "Dana Whitfield",
+      "email": "dana.whitfield@doit.example",
+      "region": "EMEA"
+    },
+    "contacts": [
+      { "contact_id": "con_00051", "full_name": "Noa Barak", "email": "noa.barak@orbital.example", "role": "Founder", "is_primary": true }
+    ],
+    "subscriptions": [
+      { "subscription_id": "sub_10009", "product_id": "prd_navigator", "tier": "Essentials", "start_date": "2024-02-01", "end_date": null, "seats": 8, "mrr_usd": 350.0, "billing_frequency": "monthly", "status": "active" },
+      { "subscription_id": "sub_10010", "product_id": "prd_flexsave", "tier": "Standard", "start_date": "2024-02-01", "end_date": null, "seats": 0, "mrr_usd": 0.0, "billing_frequency": "usage_based", "status": "active" }
+    ],
+    "billing_accounts": [
+      { "billing_account_id": "aws-5521-8834-1190", "cloud_provider": "AWS", "currency": "USD", "payment_terms": "credit_card", "is_reseller_account": true, "activated_on": "2024-02-01" }
+    ]
+  },
+  {
+    "customer_id": "cus_0006",
+    "customer_name": "Brightlane Logistics",
+    "status": "churned",
+    "segment": "Mid-Market",
+    "industry": "Logistics",
+    "created_at": "2022-04-19T07:05:52Z",
+    "address": {
+      "street": "Keizersgracht 241",
+      "city": "Amsterdam",
+      "country": "Netherlands",
+      "country_code": "NL",
+      "region": "EMEA"
+    },
+    "account_manager": {
+      "employee_id": "emp_455",
+      "name": "Sofia Almeida",
+      "email": "sofia.almeida@doit.example",
+      "region": "EMEA"
+    },
+    "contacts": [
+      { "contact_id": "con_00061", "full_name": "Jeroen Visser", "email": "jeroen.visser@brightlane.example", "role": "Billing", "is_primary": true }
+    ],
+    "subscriptions": [
+      { "subscription_id": "sub_10011", "product_id": "prd_navigator", "tier": "Standard", "start_date": "2022-05-01", "end_date": "2024-06-30", "seats": 60, "mrr_usd": 2400.0, "billing_frequency": "monthly", "status": "churned" }
+    ],
+    "billing_accounts": [
+      { "billing_account_id": "04V2W3-X4Y5Z6-A7B8C9", "cloud_provider": "GCP", "currency": "EUR", "payment_terms": "net_45", "is_reseller_account": true, "activated_on": "2022-05-01" }
+    ]
+  },
+  {
+    "customer_id": "cus_0007",
+    "customer_name": "Solstice Gaming",
+    "status": "active",
+    "segment": "Startup",
+    "industry": "Gaming",
+    "created_at": "2023-05-22T19:12:07Z",
+    "address": {
+      "street": "Rua Oscar Freire 379",
+      "city": "Sao Paulo",
+      "country": "Brazil",
+      "country_code": "BR",
+      "region": "LATAM"
+    },
+    "account_manager": {
+      "employee_id": "emp_512",
+      "name": "Diego Ramirez",
+      "email": "diego.ramirez@doit.example",
+      "region": "LATAM"
+    },
+    "contacts": [
+      { "contact_id": "con_00071", "full_name": "Camila Souza", "email": "camila.souza@solstice.example", "role": "Billing", "is_primary": true },
+      { "contact_id": "con_00072", "full_name": "Lucas Pereira", "email": "lucas.pereira@solstice.example", "role": "Technical", "is_primary": false }
+    ],
+    "subscriptions": [
+      { "subscription_id": "sub_10012", "product_id": "prd_navigator", "tier": "Essentials", "start_date": "2023-06-01", "end_date": null, "seats": 15, "mrr_usd": 600.0, "billing_frequency": "monthly", "status": "active" },
+      { "subscription_id": "sub_10013", "product_id": "prd_eks_lens", "tier": "Standard", "start_date": "2024-01-01", "end_date": null, "seats": 15, "mrr_usd": 450.0, "billing_frequency": "monthly", "status": "active" }
+    ],
+    "billing_accounts": [
+      { "billing_account_id": "aws-3301-5567-9982", "cloud_provider": "AWS", "currency": "USD", "payment_terms": "credit_card", "is_reseller_account": true, "activated_on": "2023-06-01" }
+    ]
+  },
+  {
+    "customer_id": "cus_0008",
+    "customer_name": "Aurora Semiconductor",
+    "status": "active",
+    "segment": "Enterprise",
+    "industry": "Technology",
+    "created_at": "2020-10-02T10:00:00Z",
+    "address": {
+      "street": "1-6-1 Otemachi",
+      "city": "Tokyo",
+      "country": "Japan",
+      "country_code": "JP",
+      "region": "APAC"
+    },
+    "account_manager": {
+      "employee_id": "emp_318",
+      "name": "Yuki Tanaka",
+      "email": "yuki.tanaka@doit.example",
+      "region": "APAC"
+    },
+    "contacts": [
+      { "contact_id": "con_00081", "full_name": "Hiroshi Sato", "email": "hiroshi.sato@aurora.example", "role": "Billing", "is_primary": true },
+      { "contact_id": "con_00082", "full_name": "Mei Nakamura", "email": "mei.nakamura@aurora.example", "role": "FinOps", "is_primary": false }
+    ],
+    "subscriptions": [
+      { "subscription_id": "sub_10014", "product_id": "prd_navigator", "tier": "Premium", "start_date": "2020-11-01", "end_date": null, "seats": 540, "mrr_usd": 15200.0, "billing_frequency": "monthly", "status": "active" },
+      { "subscription_id": "sub_10015", "product_id": "prd_solve", "tier": "Premium", "start_date": "2020-11-01", "end_date": null, "seats": 540, "mrr_usd": 8100.0, "billing_frequency": "monthly", "status": "active" },
+      { "subscription_id": "sub_10016", "product_id": "prd_eks_lens", "tier": "Premium", "start_date": "2023-02-01", "end_date": null, "seats": 200, "mrr_usd": 2600.0, "billing_frequency": "monthly", "status": "active" }
+    ],
+    "billing_accounts": [
+      { "billing_account_id": "05D0E1-F2G3H4-I5J6K7", "cloud_provider": "GCP", "currency": "JPY", "payment_terms": "net_60", "is_reseller_account": true, "activated_on": "2020-11-01" },
+      { "billing_account_id": "aws-9912-4408-6673", "cloud_provider": "AWS", "currency": "JPY", "payment_terms": "net_60", "is_reseller_account": true, "activated_on": "2021-03-01" },
+      { "billing_account_id": "az-sub-1c9d-4e88", "cloud_provider": "Azure", "currency": "JPY", "payment_terms": "net_60", "is_reseller_account": false, "activated_on": "2022-09-01" }
+    ]
+  }
+]

@@ -1,0 +1,79 @@
+version: 2
+
+models:
+  - name: raw_customers
+    description: >
+      Untouched landing of `data/raw/customers.json`. Nested structs and
+      arrays are preserved so the staging layer owns all flattening.
+    columns:
+      - name: customer_id
+        description: Natural key of the customer.
+        data_tests:
+          - not_null
+          - unique
+      - name: customer_name
+        description: Legal / trading name of the customer.
+        data_tests:
+          - not_null
+      - name: address
+        description: "Struct: street, city, country, country_code, region."
+      - name: account_manager
+        description: "Struct: employee_id, name, email, region."
+      - name: contacts
+        description: Array of contact structs.
+      - name: subscriptions
+        description: Array of subscription structs (one per product).
+      - name: billing_accounts
+        description: Array of cloud billing account structs.
+      - name: _loaded_at
+        description: Timestamp the raw model was materialised.
+
+  - name: raw_products
+    description: Untouched landing of `data/raw/products.json`.
+    columns:
+      - name: product_id
+        description: Natural key of the product.
+        data_tests:
+          - not_null
+          - unique
+      - name: supported_providers
+        description: List of cloud providers the product supports.
+      - name: features
+        description: Array of feature structs.
+      - name: pricing
+        description: "Struct: model, currency, base_fee_usd and a `tiers` array."
+      - name: _loaded_at
+        description: Timestamp the raw model was materialised.
+
+  - name: raw_cloud_usage
+    description: >
+      Untouched landing of `data/raw/cloud_usage.json` - a simulated
+      multicloud billing export at day / billing account / SKU grain.
+      Materialised **incrementally**: each run reloads only the trailing
+      `incremental_lookback_days` of `usage_date` and replaces the matching
+      `usage_id` rows.
+    columns:
+      - name: usage_id
+        description: Natural key of the usage line.
+        data_tests:
+          - not_null
+          - unique
+      - name: customer_id
+        description: Owning customer.
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('raw_customers')
+              field: customer_id
+      - name: cost
+        description: "Struct: list_cost_usd, discount_usd, net_cost_usd, currency."
+      - name: savings
+        description: "Struct: flexsave_eligible, flexsave_savings_usd, optimisation_savings_usd."
+      - name: credits
+        description: Array of credit structs (negative amounts).
+      - name: labels
+        description: Array of {key, value} label structs.
+      - name: _usage_date
+        description: Typed copy of `usage_date`; the incremental partition key.
+      - name: _loaded_at
+        description: Timestamp the raw model was materialised.

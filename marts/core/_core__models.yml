@@ -1,0 +1,77 @@
+version: 2
+
+models:
+  - name: dim_customers
+    description: >
+      Conformed customer dimension: master data attributes plus
+      subscription revenue and cloud footprint roll-ups.
+    columns:
+      - name: customer_id
+        description: Primary key.
+        data_tests:
+          - not_null
+          - unique
+      - name: active_mrr_usd
+        description: Sum of MRR across active subscriptions, in USD.
+        data_tests:
+          - not_null
+      - name: is_multicloud
+        description: True when the customer bills on more than one cloud provider.
+      - name: cloud_providers
+        description: Comma separated list of the providers the customer bills on.
+
+  - name: dim_products
+    description: Product dimension with feature availability, pricing envelope and adoption.
+    columns:
+      - name: product_id
+        description: Primary key.
+        data_tests:
+          - not_null
+          - unique
+      - name: active_mrr_usd
+        description: MRR contributed by active subscriptions of this product.
+
+  - name: dim_billing_accounts
+    description: >
+      Cloud billing account dimension - the bridge between the customer
+      master data and the billing export.
+    columns:
+      - name: billing_account_id
+        description: Primary key.
+        data_tests:
+          - not_null
+          - unique
+      - name: customer_id
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('dim_customers')
+              field: customer_id
+      - name: cloud_provider
+        data_tests:
+          - accepted_values:
+              values: ["GCP", "AWS", "Azure"]
+
+  - name: fct_subscriptions
+    description: One row per subscription, with customer and product context and revenue measures.
+    columns:
+      - name: subscription_id
+        description: Primary key.
+        data_tests:
+          - not_null
+          - unique
+      - name: customer_id
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('dim_customers')
+              field: customer_id
+      - name: product_id
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('dim_products')
+              field: product_id
+      - name: mrr_usd
+        data_tests:
+          - not_null

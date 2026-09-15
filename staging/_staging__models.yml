@@ -1,0 +1,212 @@
+version: 2
+
+models:
+  - name: stg_customers
+    description: One row per customer, with the address and account manager structs flattened.
+    columns:
+      - name: customer_id
+        description: Primary key.
+        data_tests:
+          - not_null
+          - unique
+      - name: customer_status
+        description: Lifecycle status of the account.
+        data_tests:
+          - accepted_values:
+              values: ["active", "churned"]
+      - name: customer_segment
+        description: Go-to-market segment.
+        data_tests:
+          - accepted_values:
+              values: ["Enterprise", "Mid-Market", "Startup"]
+      - name: sales_region
+        description: Region that owns the account (from the address struct).
+      - name: account_manager_id
+        description: Employee id of the owning account manager.
+
+  - name: stg_customer_contacts
+    description: One row per customer contact, exploded from the nested `contacts` array.
+    columns:
+      - name: contact_id
+        data_tests:
+          - not_null
+          - unique
+      - name: customer_id
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('stg_customers')
+              field: customer_id
+      - name: is_primary_contact
+        description: True for the single billing/primary contact.
+
+  - name: stg_subscriptions
+    description: One row per subscription, exploded from the nested `subscriptions` array.
+    columns:
+      - name: subscription_id
+        data_tests:
+          - not_null
+          - unique
+      - name: customer_id
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('stg_customers')
+              field: customer_id
+      - name: product_id
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('stg_products')
+              field: product_id
+      - name: mrr_usd
+        description: Monthly recurring revenue in USD.
+        data_tests:
+          - not_null
+      - name: arr_usd
+        description: Annualised recurring revenue (mrr_usd * 12).
+      - name: is_active
+        description: True when the subscription is active and has no end date.
+
+  - name: stg_billing_accounts
+    description: One row per cloud billing account, exploded from the nested `billing_accounts` array.
+    columns:
+      - name: billing_account_id
+        data_tests:
+          - not_null
+          - unique
+      - name: customer_id
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('stg_customers')
+              field: customer_id
+      - name: cloud_provider
+        data_tests:
+          - accepted_values:
+              values: ["GCP", "AWS", "Azure"]
+
+  - name: stg_products
+    description: One row per product, with the `pricing` struct flattened.
+    columns:
+      - name: product_id
+        data_tests:
+          - not_null
+          - unique
+      - name: pricing_model
+        description: How the product is charged (percentage of spend, flat monthly, etc.).
+
+  - name: stg_product_features
+    description: One row per product / feature, exploded from the nested `features` array.
+    columns:
+      - name: product_id
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('stg_products')
+              field: product_id
+      - name: feature_code
+        data_tests:
+          - not_null
+      - name: availability_status
+        data_tests:
+          - accepted_values:
+              values: ["GA", "PREVIEW", "RETIRED"]
+
+  - name: stg_product_pricing_tiers
+    description: One row per product / pricing tier, exploded from `pricing.tiers`.
+    columns:
+      - name: product_id
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('stg_products')
+              field: product_id
+      - name: tier_name
+        data_tests:
+          - not_null
+      - name: rate_pct
+        description: Percentage rate applied within the tier.
+
+  - name: stg_cloud_usage
+    description: >
+      One row per usage line (day / billing account / SKU) with every
+      nested struct flattened, the common labels promoted to columns and
+      the credit total pre-aggregated. Materialised **incrementally**
+      (delete+insert on `usage_id`) rather than as a view, because the
+      struct extraction is too expensive to repeat per query.
+    columns:
+      - name: usage_id
+        data_tests:
+          - not_null
+          - unique
+      - name: customer_id
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('stg_customers')
+              field: customer_id
+      - name: billing_account_id
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('stg_billing_accounts')
+              field: billing_account_id
+      - name: cloud_provider
+        data_tests:
+          - accepted_values:
+              values: ["GCP", "AWS", "Azure"]
+      - name: net_cost_usd
+        description: List cost less negotiated discount, before credits.
+        data_tests:
+          - not_null
+      - name: effective_cost_usd
+        description: Net cost after credits - what the customer actually pays.
+      - name: environment
+        description: Value of the `env` label, when present.
+      - name: labels_map
+        description: All labels as a MAP for ad-hoc lookups (labels_map['env']).
+
+  - name: stg_cloud_usage_credits
+    description: >
+      One row per usage line / credit, exploded from the nested `credits`
+      array. Incremental - whole `usage_date` partitions are replaced.
+    columns:
+      - name: credit_id
+        data_tests:
+          - not_null
+      - name: usage_id
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('stg_cloud_usage')
+              field: usage_id
+      - name: credit_type
+        data_tests:
+          - accepted_values:
+              values:
+                [
+                  "committed_use_discount",
+                  "sustained_use_discount",
+                  "promotional_credit",
+                  "reseller_discount",
+                ]
+      - name: credit_amount_usd
+        description: Negative amount applied against the usage line.
+
+  - name: stg_cloud_usage_labels
+    description: >
+      Tall key/value table of every label on every usage line. Incremental
+      - whole `usage_date` partitions are replaced.
+    columns:
+      - name: usage_id
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('stg_cloud_usage')
+              field: usage_id
+      - name: label_key
+        data_tests:
+          - not_null
+      - name: label_value
+        description: Label value as landed.

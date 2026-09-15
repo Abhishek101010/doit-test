@@ -1,0 +1,119 @@
+[
+  {
+    "product_id": "prd_navigator",
+    "product_name": "DoiT Cloud Navigator",
+    "product_family": "Cloud Intelligence",
+    "description": "Multicloud cost visibility, budgeting, anomaly detection and reporting.",
+    "launch_date": "2018-05-01",
+    "is_active": true,
+    "supported_providers": ["GCP", "AWS", "Azure"],
+    "features": [
+      { "feature_code": "cost_anomaly", "feature_name": "Cost Anomaly Detection", "availability": "GA", "min_tier": "Essentials" },
+      { "feature_code": "budgets", "feature_name": "Budgets & Alerts", "availability": "GA", "min_tier": "Essentials" },
+      { "feature_code": "custom_reports", "feature_name": "Custom Analytics Reports", "availability": "GA", "min_tier": "Standard" },
+      { "feature_code": "cost_allocation", "feature_name": "Label-based Cost Allocation", "availability": "GA", "min_tier": "Standard" },
+      { "feature_code": "forecasting", "feature_name": "ML Spend Forecasting", "availability": "GA", "min_tier": "Enhanced" },
+      { "feature_code": "governance", "feature_name": "Governance & Guardrails", "availability": "PREVIEW", "min_tier": "Premium" }
+    ],
+    "pricing": {
+      "model": "tiered_percentage_of_spend",
+      "currency": "USD",
+      "base_fee_usd": 0.0,
+      "tiers": [
+        { "tier_name": "Essentials", "min_monthly_spend_usd": 0, "max_monthly_spend_usd": 25000, "rate_pct": 4.0, "included_support": "community" },
+        { "tier_name": "Standard", "min_monthly_spend_usd": 25000, "max_monthly_spend_usd": 100000, "rate_pct": 3.0, "included_support": "business_hours" },
+        { "tier_name": "Enhanced", "min_monthly_spend_usd": 100000, "max_monthly_spend_usd": 500000, "rate_pct": 2.0, "included_support": "24x5" },
+        { "tier_name": "Premium", "min_monthly_spend_usd": 500000, "max_monthly_spend_usd": 100000000, "rate_pct": 1.25, "included_support": "24x7" }
+      ]
+    }
+  },
+  {
+    "product_id": "prd_solve",
+    "product_name": "DoiT Cloud Solve",
+    "product_family": "Cloud Support",
+    "description": "Unlimited multicloud technical support and architecture guidance from certified engineers.",
+    "launch_date": "2019-09-15",
+    "is_active": true,
+    "supported_providers": ["GCP", "AWS", "Azure"],
+    "features": [
+      { "feature_code": "ticketing", "feature_name": "24x7 Ticketing", "availability": "GA", "min_tier": "Standard" },
+      { "feature_code": "arch_review", "feature_name": "Architecture Reviews", "availability": "GA", "min_tier": "Standard" },
+      { "feature_code": "incident_bridge", "feature_name": "Live Incident Bridge", "availability": "GA", "min_tier": "Premium" },
+      { "feature_code": "named_tam", "feature_name": "Named Technical Account Manager", "availability": "GA", "min_tier": "Premium" }
+    ],
+    "pricing": {
+      "model": "flat_monthly",
+      "currency": "USD",
+      "base_fee_usd": 1200.0,
+      "tiers": [
+        { "tier_name": "Standard", "min_monthly_spend_usd": 0, "max_monthly_spend_usd": 250000, "rate_pct": 0.0, "included_support": "24x5" },
+        { "tier_name": "Premium", "min_monthly_spend_usd": 250000, "max_monthly_spend_usd": 100000000, "rate_pct": 0.0, "included_support": "24x7" }
+      ]
+    }
+  },
+  {
+    "product_id": "prd_flexsave",
+    "product_name": "DoiT Flexsave",
+    "product_family": "Cloud Optimization",
+    "description": "Automated compute commitment management that delivers savings without long-term lock-in.",
+    "launch_date": "2021-03-10",
+    "is_active": true,
+    "supported_providers": ["GCP", "AWS"],
+    "features": [
+      { "feature_code": "auto_commit", "feature_name": "Automated Commitment Purchasing", "availability": "GA", "min_tier": "Standard" },
+      { "feature_code": "savings_report", "feature_name": "Realised Savings Reporting", "availability": "GA", "min_tier": "Standard" },
+      { "feature_code": "rds_coverage", "feature_name": "Managed Database Coverage", "availability": "PREVIEW", "min_tier": "Standard" }
+    ],
+    "pricing": {
+      "model": "share_of_savings",
+      "currency": "USD",
+      "base_fee_usd": 0.0,
+      "tiers": [
+        { "tier_name": "Standard", "min_monthly_spend_usd": 0, "max_monthly_spend_usd": 100000000, "rate_pct": 15.0, "included_support": "included_with_solve" }
+      ]
+    }
+  },
+  {
+    "product_id": "prd_eks_lens",
+    "product_name": "DoiT Kubernetes Lens",
+    "product_family": "Cloud Optimization",
+    "description": "Container-level cost allocation and rightsizing recommendations for EKS and GKE.",
+    "launch_date": "2022-11-01",
+    "is_active": true,
+    "supported_providers": ["GCP", "AWS"],
+    "features": [
+      { "feature_code": "pod_cost", "feature_name": "Pod & Namespace Cost Allocation", "availability": "GA", "min_tier": "Standard" },
+      { "feature_code": "rightsizing", "feature_name": "Workload Rightsizing", "availability": "GA", "min_tier": "Standard" },
+      { "feature_code": "idle_detect", "feature_name": "Idle Node Detection", "availability": "GA", "min_tier": "Premium" }
+    ],
+    "pricing": {
+      "model": "per_cluster_monthly",
+      "currency": "USD",
+      "base_fee_usd": 150.0,
+      "tiers": [
+        { "tier_name": "Standard", "min_monthly_spend_usd": 0, "max_monthly_spend_usd": 250000, "rate_pct": 0.0, "included_support": "business_hours" },
+        { "tier_name": "Premium", "min_monthly_spend_usd": 250000, "max_monthly_spend_usd": 100000000, "rate_pct": 0.0, "included_support": "24x7" }
+      ]
+    }
+  },
+  {
+    "product_id": "prd_trainer",
+    "product_name": "DoiT Cloud Academy",
+    "product_family": "Enablement",
+    "description": "Retired enablement and certification programme for cloud engineering teams.",
+    "launch_date": "2019-01-20",
+    "is_active": false,
+    "supported_providers": ["GCP"],
+    "features": [
+      { "feature_code": "labs", "feature_name": "Hands-on Labs", "availability": "RETIRED", "min_tier": "Standard" }
+    ],
+    "pricing": {
+      "model": "per_seat_monthly",
+      "currency": "USD",
+      "base_fee_usd": 45.0,
+      "tiers": [
+        { "tier_name": "Standard", "min_monthly_spend_usd": 0, "max_monthly_spend_usd": 100000000, "rate_pct": 0.0, "included_support": "none" }
+      ]
+    }
+  }
+]

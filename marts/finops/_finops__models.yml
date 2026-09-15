@@ -1,0 +1,108 @@
+version: 2
+
+models:
+  - name: fct_cloud_usage_daily
+    description: >
+      Atomic FinOps fact - one row per usage line (day / billing account /
+      SKU) with customer, account, resource and label context plus the
+      cost and savings measures. Incremental (delete+insert on `usage_id`)
+      over a rolling `incremental_lookback_days` window.
+    columns:
+      - name: usage_id
+        description: Primary key, inherited from the billing export.
+        data_tests:
+          - not_null
+          - unique
+      - name: customer_id
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('dim_customers')
+              field: customer_id
+      - name: billing_account_id
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('dim_billing_accounts')
+              field: billing_account_id
+      - name: effective_cost_usd
+        description: Net cost after credits - the amount actually charged.
+        data_tests:
+          - not_null
+      - name: total_savings_usd
+        description: Flexsave savings plus other optimisation savings.
+
+  - name: agg_customer_daily_spend
+    description: >
+      Daily spend per customer and cloud provider with a 7 day moving
+      average and day-over-day deltas for anomaly detection. Full rebuild
+      on every run - the trailing window crosses partition boundaries, so
+      an incremental rebuild would corrupt the averages at the seam.
+    columns:
+      - name: customer_provider_day_key
+        description: Grain key - customer, provider and usage date.
+        data_tests:
+          - not_null
+          - unique
+      - name: effective_cost_usd
+        data_tests:
+          - not_null
+      - name: spend_vs_7d_avg_ratio
+        description: Effective cost divided by the trailing 7 day average; > 1.5 is worth a look.
+
+  - name: agg_customer_monthly_spend
+    description: >
+      Monthly cloud spend per customer alongside the subscription MRR
+      that was live in the same month. Incremental - whole `usage_month`
+      partitions are replaced.
+    columns:
+      - name: customer_month_key
+        description: Grain key - customer and usage month.
+        data_tests:
+          - not_null
+          - unique
+      - name: customer_id
+        data_tests:
+          - relationships:
+              to: ref('dim_customers')
+              field: customer_id
+      - name: effective_cost_usd
+        data_tests:
+          - not_null
+      - name: revenue_to_spend_ratio
+        description: Subscription MRR divided by effective cloud spend for the month.
+
+  - name: agg_service_monthly_spend
+    description: >
+      Monthly spend by customer, cloud provider and service, ranked to
+      surface the top cost drivers. Incremental - whole `usage_month`
+      partitions are replaced.
+    columns:
+      - name: customer_id
+        data_tests:
+          - not_null
+      - name: service_id
+        data_tests:
+          - not_null
+      - name: service_cost_rank
+        description: Rank of the service within the customer month by effective cost.
+      - name: share_of_customer_month_spend
+        description: Fraction of the customer's monthly spend attributable to the service.
+
+  - name: agg_cost_allocation_monthly
+    description: >
+      Label based cost allocation - monthly spend split by environment,
+      team, cost centre and application, with unlabelled spend surfaced
+      as `unallocated`. Incremental - whole `usage_month` partitions are
+      replaced.
+    columns:
+      - name: customer_id
+        data_tests:
+          - not_null
+      - name: environment
+        description: Value of the `env` label, or `unallocated`.
+      - name: is_missing_cost_centre
+        description: True when the usage lines carried no `cost_centre` label.
+      - name: effective_cost_usd
+        data_tests:
+          - not_null

@@ -1,0 +1,17 @@
+doit_demo:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: "doit_demo.duckdb"
+      threads: 4
+      extensions:
+        - json
+
+    # Same engine, isolated database file - used by `dbt build --target ci`
+    ci:
+      type: duckdb
+      path: "target/ci.duckdb"
+      threads: 4
+      extensions:
+        - json
