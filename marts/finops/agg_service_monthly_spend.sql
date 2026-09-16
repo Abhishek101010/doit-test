@@ -10,15 +10,20 @@
 
 {{
     config(
-        materialized = 'incremental',
+        materialized = incremental_or_table(),
         schema = 'marts',
-        unique_key = 'usage_month',
-        incremental_strategy = 'delete+insert',
+        incremental_strategy = 'insert_overwrite',
+        partition_by = {
+            'field': 'usage_month',
+            'data_type': 'date',
+            'granularity': 'month'
+        },
+        cluster_by = ['customer_id', 'cloud_provider', 'service_id'],
         tags = ['marts', 'finops', 'incremental']
     )
 }}
 
-with usage as (
+with usage_lines as (
 
     select * from {{ ref('fct_cloud_usage_daily') }}
     {{ incremental_month_filter('usage_month') }}
@@ -49,7 +54,7 @@ aggregated as (
         sum(effective_cost_usd)                         as effective_cost_usd,
         sum(total_savings_usd)                          as total_savings_usd
 
-    from usage
+    from usage_lines
     group by 1, 2, 3, 4, 5, 6, 7, 8
 
 ),

@@ -6,23 +6,32 @@ would land in a FinOps platform such as DoiT: every row is one day of usage
 for one SKU, with nested structs (service, sku, location, usage, cost,
 savings) and nested arrays (credits, labels).
 
-Deterministic: a fixed seed means re-running produces the exact same file, so
-the committed data and the dbt tests stay stable.
+Deterministic *shape*: a fixed seed means re-running produces the same volumes,
+costs and labels, so the dbt tests stay stable.
+
+The date window is a rolling one ending today, because the target BigQuery
+project runs in the free sandbox tier, which force-expires any table partition
+older than 60 days. Generating a fixed historical window (e.g. 2024) would mean
+every partition was deleted the instant dbt wrote it. Pass `--days` to change
+the window length, or `--end-date` to pin it for a reproducible build.
 
 Usage:
     python scripts/generate_cloud_usage.py
+    python scripts/generate_cloud_usage.py --days 45 --end-date 2026-09-15
 """
 
 from __future__ import annotations
 
+import argparse
 import json
 import random
 from datetime import date, timedelta
 from pathlib import Path
 
 SEED = 20240501
-START_DATE = date(2024, 5, 1)
-END_DATE = date(2024, 6, 30)
+
+# BigQuery sandbox expires partitions older than 60 days; stay inside that.
+DEFAULT_WINDOW_DAYS = 55
 
 ROOT = Path(__file__).resolve().parents[1]
 RAW_DIR = ROOT / "data" / "raw"
@@ -152,7 +161,7 @@ def round2(value: float) -> float:
     return float(round(value, 2))
 
 
-def build_usage_rows() -> list[dict]:
+def build_usage_rows(start_date: date, end_date: date) -> list[dict]:
     rng = random.Random(SEED)
     customers = json.loads(CUSTOMERS_FILE.read_text(encoding="utf-8"))
 
@@ -171,11 +180,11 @@ def build_usage_rows() -> list[dict]:
             spend_factor = rng.uniform(0.4, 2.6)
             used_services = rng.sample(catalogue, k=min(len(catalogue), rng.randint(2, len(catalogue))))
 
-            day = START_DATE
-            while day <= END_DATE:
+            day = start_date
+            while day <= end_date:
                 # Weekends are quieter, and there is a gentle growth trend.
                 weekend_factor = 0.72 if day.weekday() >= 5 else 1.0
-                trend_factor = 1.0 + ((day - START_DATE).days / 400.0)
+                trend_factor = 1.0 + ((day - start_date).days / 400.0)
 
                 for service in used_services:
                     for sku_id, sku_desc, unit, unit_price, qty_min, qty_max in service["skus"]:
@@ -273,13 +282,34 @@ def build_usage_rows() -> list[dict]:
     return rows
 
 
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--days",
+        type=int,
+        default=DEFAULT_WINDOW_DAYS,
+        help=f"Length of the usage window in days (default: {DEFAULT_WINDOW_DAYS}).",
+    )
+    parser.add_argument(
+        "--end-date",
+        type=date.fromisoformat,
+        default=date.today(),
+        help="Last day of the window, YYYY-MM-DD (default: today).",
+    )
+    return parser.parse_args()
+
+
 def main() -> None:
-    rows = build_usage_rows()
+    args = parse_args()
+    end_date = args.end_date
+    start_date = end_date - timedelta(days=args.days - 1)
+
+    rows = build_usage_rows(start_date, end_date)
     RAW_DIR.mkdir(parents=True, exist_ok=True)
     with OUTPUT_FILE.open("w", encoding="utf-8", newline="\n") as handle:
         json.dump(rows, handle, indent=2)
         handle.write("\n")
-    print(f"Wrote {len(rows):,} usage rows to {OUTPUT_FILE}")
+    print(f"Wrote {len(rows):,} usage rows for {start_date} .. {end_date} to {OUTPUT_FILE}")
 
 
 if __name__ == "__main__":

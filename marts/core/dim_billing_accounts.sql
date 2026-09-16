@@ -32,7 +32,7 @@ customers as (
 
 ),
 
-usage as (
+usage_lines as (
 
     select
         billing_account_id,
@@ -69,7 +69,7 @@ final as (
 
     from accounts a
     inner join customers c on c.customer_id = a.customer_id
-    left join usage u      on u.billing_account_id = a.billing_account_id
+    left join usage_lines u on u.billing_account_id = a.billing_account_id
 
 )
 

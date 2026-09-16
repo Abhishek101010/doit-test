@@ -25,22 +25,23 @@ with source as (
 exploded as (
 
     select
-        customer_id,
-        unnest(billing_accounts) as billing_account
-    from source
+        s.customer_id,
+        ba as billing_account
+    from source as s
+    cross join unnest(s.billing_accounts) as ba
 
 ),
 
 renamed as (
 
     select
-        struct_extract(billing_account, 'billing_account_id')            as billing_account_id,
+        billing_account.billing_account_id      as billing_account_id,
         customer_id,
-        struct_extract(billing_account, 'cloud_provider')                as cloud_provider,
-        struct_extract(billing_account, 'currency')                      as billing_currency,
-        struct_extract(billing_account, 'payment_terms')                 as payment_terms,
-        struct_extract(billing_account, 'is_reseller_account')           as is_reseller_account,
-        cast(struct_extract(billing_account, 'activated_on') as date)    as activated_on
+        billing_account.cloud_provider          as cloud_provider,
+        billing_account.currency                as billing_currency,
+        billing_account.payment_terms           as payment_terms,
+        billing_account.is_reseller_account     as is_reseller_account,
+        billing_account.activated_on            as activated_on
     from exploded
 
 )

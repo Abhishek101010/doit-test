@@ -22,27 +22,27 @@ with source as (
 renamed as (
 
     select
-        product_id,
-        product_name,
-        product_family,
-        description                                                 as product_description,
-        is_active                                                   as is_active_product,
-        cast(launch_date as date)                                   as launch_date,
+        p.product_id,
+        p.product_name,
+        p.product_family,
+        p.description                                       as product_description,
+        p.is_active                                         as is_active_product,
+        p.launch_date,
 
-        supported_providers,
-        array_to_string(supported_providers, ', ')                   as supported_providers_list,
-        len(supported_providers)                                    as supported_provider_count,
-        len(features)                                               as feature_count,
+        p.supported_providers,
+        array_to_string(p.supported_providers, ', ')        as supported_providers_list,
+        array_length(p.supported_providers)                 as supported_provider_count,
+        array_length(p.features)                            as feature_count,
 
         -- pricing struct
-        struct_extract(pricing, 'model')                            as pricing_model,
-        struct_extract(pricing, 'currency')                         as pricing_currency,
-        cast(struct_extract(pricing, 'base_fee_usd') as double)     as base_fee_usd,
-        len(struct_extract(pricing, 'tiers'))                       as pricing_tier_count,
+        p.pricing.model                                     as pricing_model,
+        p.pricing.currency                                  as pricing_currency,
+        p.pricing.base_fee_usd                              as base_fee_usd,
+        array_length(p.pricing.tiers)                       as pricing_tier_count,
 
-        _loaded_at
+        p._loaded_at
 
-    from source
+    from source as p
 
 )
 

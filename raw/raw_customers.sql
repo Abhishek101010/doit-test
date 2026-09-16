@@ -1,9 +1,10 @@
 {#
     RAW - customers
 
-    Lands `data/raw/customers.json` exactly as it arrives: nested structs
-    (address, account_manager) and nested arrays (contacts, subscriptions,
-    billing_accounts) are preserved. No renaming, no casting, no filtering.
+    Lands the `doit_demo.customers` export exactly as it arrives:
+    nested structs (address, account_manager) and nested arrays (contacts,
+    subscriptions, billing_accounts) are preserved. No renaming, no casting,
+    no filtering.
 
     Small, fully-restated master data, so it is rebuilt on every run.
 #}
@@ -18,6 +19,6 @@
 
 select
     *,
-    '{{ var("raw_data_path") }}/customers.json' as _source_file,
-    cast(now() as timestamp) as _loaded_at
-from {{ raw_json('customers') }}
+    'doit_demo.customers' as _source_table,
+    current_timestamp() as _loaded_at
+from {{ source('landing', 'customers') }}

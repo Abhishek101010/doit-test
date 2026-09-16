@@ -25,28 +25,29 @@ with source as (
 exploded as (
 
     select
-        customer_id,
-        unnest(subscriptions) as subscription
-    from source
+        s.customer_id,
+        sub as subscription
+    from source as s
+    cross join unnest(s.subscriptions) as sub
 
 ),
 
 renamed as (
 
     select
-        struct_extract(subscription, 'subscription_id')      as subscription_id,
+        subscription.subscription_id            as subscription_id,
         customer_id,
-        struct_extract(subscription, 'product_id')           as product_id,
-        struct_extract(subscription, 'tier')                 as subscription_tier,
-        lower(struct_extract(subscription, 'status'))        as subscription_status,
-        struct_extract(subscription, 'billing_frequency')    as billing_frequency,
-        struct_extract(subscription, 'seats')                as seats,
+        subscription.product_id                 as product_id,
+        subscription.tier                       as subscription_tier,
+        lower(subscription.status)              as subscription_status,
+        subscription.billing_frequency          as billing_frequency,
+        subscription.seats                      as seats,
 
-        cast(struct_extract(subscription, 'mrr_usd') as double)        as mrr_usd,
-        cast(struct_extract(subscription, 'mrr_usd') as double) * 12   as arr_usd,
+        subscription.mrr_usd                    as mrr_usd,
+        subscription.mrr_usd * 12               as arr_usd,
 
-        cast(struct_extract(subscription, 'start_date') as date)       as start_date,
-        cast(struct_extract(subscription, 'end_date') as date)         as end_date
+        subscription.start_date                 as start_date,
+        subscription.end_date                   as end_date
 
     from exploded
 
@@ -58,10 +59,10 @@ final as (
         *,
         (subscription_status = 'active' and end_date is null)   as is_active,
         (end_date is not null)                                  as is_churned,
-        datediff(
-            'month',
+        date_diff(
+            coalesce(end_date, current_date()),
             start_date,
-            coalesce(end_date, current_date)
+            month
         )                                                       as tenure_months
     from renamed
 

@@ -1,17 +1,46 @@
+####################################################################
+# doit_demo - dbt connection profiles
+#
+# Warehouse: Google BigQuery (project `friendlychat-843d1`).
+#
+# Authentication uses OAuth / Application Default Credentials, so no
+# secrets live in this file and it is safe to commit. Before the first
+# run, authenticate once with:
+#
+#   gcloud auth application-default login --project=friendlychat-843d1
+#
+# `dataset` is the single BigQuery dataset that holds the whole project.
+# macros/generate_schema_name.sql routes every model here regardless of the
+# per-layer `schema=` in its config(), and the landed JSON tables sit alongside
+# them. The warehouse layer stays readable from the model names: `raw_*`,
+# `stg_*`, then `dim_*` / `fct_*` / `agg_*`.
+#
+# NOTE: BigQuery dataset IDs allow letters, numbers and underscores only -
+# hyphens are not permitted, hence `doit_demo` rather than `doit-demo`.
+####################################################################
+
 doit_demo:
   target: dev
   outputs:
     dev:
-      type: duckdb
-      path: "doit_demo.duckdb"
+      type: bigquery
+      method: oauth
+      project: friendlychat-843d1
+      dataset: doit_demo
+      location: US
       threads: 4
-      extensions:
-        - json
+      priority: interactive
+      job_execution_timeout_seconds: 600
+      job_retries: 1
 
-    # Same engine, isolated database file - used by `dbt build --target ci`
+    # Same project, isolated datasets - used by `dbt build --target ci`
     ci:
-      type: duckdb
-      path: "target/ci.duckdb"
+      type: bigquery
+      method: oauth
+      project: friendlychat-843d1
+      dataset: doit_demo_ci
+      location: US
       threads: 4
-      extensions:
-        - json
+      priority: interactive
+      job_execution_timeout_seconds: 600
+      job_retries: 1

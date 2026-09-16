@@ -4,17 +4,22 @@
     Explodes the nested `credits` array. Amounts are negative because a
     credit reduces the net cost of the usage line.
 
-    Incremental on `usage_date`; the whole day is replaced (delete+insert)
+    Partitioned and incremental on `usage_date`; whole days are overwritten
     because a usage line can gain or lose credits on restatement, so a
     per-credit unique key would leave orphans behind.
 #}
 
 {{
     config(
-        materialized = 'incremental',
+        materialized = incremental_or_table(),
         schema = 'staging',
-        unique_key = 'usage_date',
-        incremental_strategy = 'delete+insert',
+        incremental_strategy = 'insert_overwrite',
+        partition_by = {
+            'field': 'usage_date',
+            'data_type': 'date',
+            'granularity': 'day'
+        },
+        cluster_by = ['customer_id', 'credit_type'],
         tags = ['staging', 'cloud_usage', 'incremental']
     )
 }}
@@ -29,37 +34,38 @@ with source as (
         cloud_provider,
         credits
     from {{ ref('raw_cloud_usage') }}
-    where len(credits) > 0
-    {{ incremental_date_filter('_usage_date', relation = this, target_column = 'usage_date', operator = 'and') }}
+    where array_length(credits) > 0
+    {{ incremental_date_filter('usage_date', relation = this, target_column = 'usage_date', operator = 'and') }}
 
 ),
 
 exploded as (
 
     select
-        usage_id,
-        usage_date,
-        customer_id,
-        billing_account_id,
-        cloud_provider,
-        unnest(credits) as credit
-    from source
+        s.usage_id,
+        s.usage_date,
+        s.customer_id,
+        s.billing_account_id,
+        s.cloud_provider,
+        c as credit
+    from source as s
+    cross join unnest(s.credits) as c
 
 ),
 
 renamed as (
 
     select
-        struct_extract(credit, 'credit_id')                     as credit_id,
+        credit.credit_id                    as credit_id,
         usage_id,
-        cast(usage_date as date)                                as usage_date,
-        date_trunc('month', cast(usage_date as date))           as usage_month,
+        usage_date,
+        date_trunc(usage_date, month)       as usage_month,
         customer_id,
         billing_account_id,
         cloud_provider,
-        struct_extract(credit, 'credit_type')                   as credit_type,
-        cast(struct_extract(credit, 'amount_usd') as double)    as credit_amount_usd,
-        abs(cast(struct_extract(credit, 'amount_usd') as double)) as credit_abs_amount_usd
+        credit.credit_type                  as credit_type,
+        credit.amount_usd                   as credit_amount_usd,
+        abs(credit.amount_usd)              as credit_abs_amount_usd
     from exploded
 
 )

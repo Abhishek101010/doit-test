@@ -23,11 +23,11 @@ subscriptions as (
 
     select
         customer_id,
-        count(*)                                                    as subscription_count,
-        count(*) filter (where is_active)                            as active_subscription_count,
-        sum(mrr_usd) filter (where is_active)                        as active_mrr_usd,
-        sum(arr_usd) filter (where is_active)                        as active_arr_usd,
-        min(start_date)                                              as first_subscription_date
+        count(*)                                    as subscription_count,
+        countif(is_active)                          as active_subscription_count,
+        sum(if(is_active, mrr_usd, null))           as active_mrr_usd,
+        sum(if(is_active, arr_usd, null))           as active_arr_usd,
+        min(start_date)                             as first_subscription_date
     from {{ ref('stg_subscriptions') }}
     group by 1
 
@@ -37,10 +37,10 @@ billing_accounts as (
 
     select
         customer_id,
-        count(*)                                                     as billing_account_count,
-        count(distinct cloud_provider)                               as cloud_provider_count,
-        array_to_string(list_sort(list(distinct cloud_provider)), ', ') as cloud_providers,
-        min(activated_on)                                            as first_account_activated_on
+        count(*)                                                        as billing_account_count,
+        count(distinct cloud_provider)                                  as cloud_provider_count,
+        string_agg(distinct cloud_provider, ', ' order by cloud_provider) as cloud_providers,
+        min(activated_on)                                               as first_account_activated_on
     from {{ ref('stg_billing_accounts') }}
     group by 1
 
@@ -93,7 +93,7 @@ final as (
 
         c.customer_created_at,
         c.customer_created_date,
-        datediff('month', c.customer_created_date, current_date) as customer_tenure_months
+        date_diff(current_date(), c.customer_created_date, month) as customer_tenure_months
 
     from customers c
     left join subscriptions s   on s.customer_id = c.customer_id
